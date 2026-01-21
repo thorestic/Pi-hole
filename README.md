@@ -1,4 +1,4 @@
-````markdown
+
 # 🧠 Pi-hole Installation & Troubleshooting on Raspberry Pi (Full Technical Guide)
 
 A complete, step-by-step, and *field-tested* guide to install, configure, debug, and stabilize **Pi-hole** on a **Raspberry Pi** — based entirely on real-world issues and resolutions during a full deployment process.  
