@@ -27,7 +27,7 @@ A complete, step-by-step, and *field-tested* guide to install, configure, debug,
 ## 🧾 Overview
 
 **Pi-hole** is a local DNS server that blocks ads, trackers, and malicious domains *before* they ever reach your devices.  
-In this guide, we’ll build, fix, and optimize Pi-hole on a **Raspberry Pi 1** connected via Ethernet.
+In this guide, we’ll build, fix, and optimize Pi-hole on a **Raspberry Pi 1 or higher** connected via Ethernet.
 
 ---
 
