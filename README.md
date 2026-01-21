@@ -7,7 +7,7 @@ A complete, step-by-step, and *field-tested* guide to install, configure, debug,
 
 ## 📋 Table of Contents
 
-1. [Overview](#README.md#-overview)  
+1. [Overview](#README.md-overview)  
 2. [Environment & Requirements](#environment--requirements)  
 3. [Installation Steps](#installation-steps)  
 4. [Static IP Configuration](#static-ip-configuration)  
