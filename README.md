@@ -20,6 +20,7 @@ A complete, step-by-step, and *field-tested* guide to install, configure, debug,
 11. [Maintenance Commands](#maintenance-commands)  
 12. [Concepts Recap](#concepts-recap)  
 13. [Full Command Reference](#full-command-reference)  
+14. [Common Errors & Fix Summary](#common-errors--fix-summary)
 
 ---
 
@@ -48,18 +49,13 @@ In this guide, we’ll build, fix, and optimize Pi-hole on a **Raspberry Pi 1** 
 ## 🧱 Installation Steps
 
 ### 1️⃣ Update the System
-Always update before any installation:
 ```bash
 sudo apt update && sudo apt upgrade -y
 ````
 
-This ensures your system libraries and dependencies match the Pi-hole version.
-
 ---
 
 ### 2️⃣ Install Pi-hole
-
-Run the official one-liner installer:
 
 ```bash
 curl -sSL https://install.pi-hole.net | bash
@@ -78,13 +74,9 @@ During setup:
 
 ## 🧩 Static IP Configuration
 
-To make sure Pi-hole’s IP never changes:
-
 ```bash
 sudo nano /etc/dhcpcd.conf
 ```
-
-Add:
 
 ```
 interface eth0
@@ -92,8 +84,6 @@ static ip_address=192.168.0.48/24
 static routers=192.168.0.1
 static domain_name_servers=1.1.1.1 8.8.8.8
 ```
-
-Then apply:
 
 ```bash
 sudo service dhcpcd restart
@@ -103,70 +93,27 @@ sudo service dhcpcd restart
 
 ## 🌐 Router DNS Configuration
 
-In your router admin page (`192.168.0.1`), set:
-
 ```
 Primary DNS: 192.168.0.48
 Secondary DNS: 1.1.1.1
 ```
 
-This makes all devices use Pi-hole as their main DNS resolver.
-
 ---
 
 ## ⚠️ Admin Interface Issues
 
-### 1️⃣ Check if `lighttpd` is running:
-
 ```bash
 sudo systemctl status lighttpd
-```
-
-If not active:
-
-```bash
 sudo systemctl start lighttpd
 sudo systemctl enable lighttpd
-```
-
----
-
-### 2️⃣ Test local web interface:
-
-```bash
 curl http://localhost/admin
-```
-
-If it returns HTML → the web server is running correctly.
-
----
-
-### 3️⃣ Check connectivity:
-
-```bash
 ping 192.168.0.48
-```
-
----
-
-### 4️⃣ Verify port 80:
-
-```bash
 sudo ss -tuln | grep :80
-```
-
-Expected output should show `LISTEN` on `0.0.0.0:80`.
-
----
-
-### 5️⃣ Restart both web and DNS services:
-
-```bash
 sudo systemctl restart lighttpd
 sudo systemctl restart pihole-FTL
 ```
 
-Access again from browser:
+Access:
 
 ```
 http://192.168.0.48/admin
@@ -176,8 +123,6 @@ http://192.168.0.48/admin
 
 ## ❌ Lighttpd Missing or Failed
 
-If you get `lighttpd: command not found` or dashboard doesn’t start:
-
 ```bash
 sudo apt update
 sudo apt install lighttpd -y
@@ -185,19 +130,13 @@ sudo pihole -r
 sudo systemctl status lighttpd
 ```
 
-This re-installs and auto-enables the Pi-hole web server.
-
 ---
 
 ## ❌ SetupVars.conf Missing
 
-If `/etc/pihole/setupVars.conf` is missing, recreate it:
-
 ```bash
 sudo nano /etc/pihole/setupVars.conf
 ```
-
-Paste:
 
 ```
 PIHOLE_INTERFACE=eth0
@@ -214,13 +153,11 @@ DNSSEC=false
 REV_SERVER=false
 ```
 
-If using Wi-Fi:
+If Wi-Fi:
 
 ```
 PIHOLE_INTERFACE=wlan0
 ```
-
-Then:
 
 ```bash
 sudo systemctl restart pihole-FTL
@@ -231,29 +168,13 @@ sudo systemctl restart lighttpd
 
 ## 🧠 DNS Timeout / Query Refused Fix
 
-If:
-
-```
-nslookup google.com 192.168.0.48
-```
-
-returns **Query Refused** or **Timeout**,
-Pi-hole is restricted to “local” queries.
-
-Allow all LAN clients:
-
 ```bash
 sudo sed -i 's|DNSMASQ_LISTENING=.*|DNSMASQ_LISTENING=all|' /etc/pihole/setupVars.conf
 sudo pihole reloaddns
-```
-
-Verify Pi-hole is listening globally:
-
-```bash
 sudo netstat -tulnp | grep :53
 ```
 
-Expected output:
+Expected:
 
 ```
 tcp   0   0 0.0.0.0:53   0.0.0.0:*   LISTEN   pihole-FTL
@@ -264,28 +185,11 @@ udp   0   0 0.0.0.0:53   0.0.0.0:*           pihole-FTL
 
 ## 🔍 Testing Commands
 
-### Test local DNS resolution
-
 ```bash
 nslookup google.com 127.0.0.1
-```
-
-### Test network DNS resolution
-
-```bash
 nslookup google.com 192.168.0.48
-```
-
-### Verify service status
-
-```bash
 sudo systemctl status pihole-FTL
 sudo systemctl status lighttpd
-```
-
-### Check open ports
-
-```bash
 sudo ss -tuln | grep :80
 sudo netstat -tulnp | grep :53
 ```
@@ -309,81 +213,64 @@ sudo netstat -tulnp | grep :53
 
 ## 🧩 Concepts Recap
 
-| Concept               | Explanation                                                              |
-| --------------------- | ------------------------------------------------------------------------ |
-| **Pi-hole**           | A DNS sinkhole that blocks ads and trackers network-wide.                |
-| **DNS (Port 53)**     | Translates human-readable domain names into IP addresses.                |
-| **FTL**               | Pi-hole’s DNS engine – fast, cached, and lightweight.                    |
-| **Lighttpd**          | Lightweight web server that hosts the Pi-hole admin interface.           |
-| **Static IP**         | Prevents the Pi-hole address from changing (critical for DNS stability). |
-| **setupVars.conf**    | Core configuration file for all Pi-hole parameters.                      |
-| **DNSMASQ_LISTENING** | Defines who can query the DNS (local vs all LAN devices).                |
+| Concept               | Explanation                                   |
+| --------------------- | --------------------------------------------- |
+| **Pi-hole**           | Local DNS sinkhole to block ads and trackers. |
+| **DNS (Port 53)**     | Resolves domains to IP addresses.             |
+| **FTL**               | Pi-hole’s high-performance DNS engine.        |
+| **Lighttpd**          | Lightweight web server for Pi-hole dashboard. |
+| **Static IP**         | Ensures DNS address consistency.              |
+| **setupVars.conf**    | Core Pi-hole configuration file.              |
+| **DNSMASQ_LISTENING** | Defines who can query DNS (`local` or `all`). |
 
 ---
 
 ## 🧾 Full Command Reference
 
 ```bash
-# Update System
 sudo apt update && sudo apt upgrade -y
-
-# Install Pi-hole
 curl -sSL https://install.pi-hole.net | bash
-
-# Verify services
 sudo systemctl status pihole-FTL
 sudo systemctl status lighttpd
-
-# Restart services
 sudo systemctl restart pihole-FTL
 sudo systemctl restart lighttpd
-
-# Fix missing lighttpd
 sudo apt install lighttpd -y
 sudo pihole -r
-
-# Fix missing setupVars.conf
 sudo nano /etc/pihole/setupVars.conf
-
-# Allow all LAN devices to query DNS
 sudo sed -i 's|DNSMASQ_LISTENING=.*|DNSMASQ_LISTENING=all|' /etc/pihole/setupVars.conf
 sudo pihole reloaddns
-
-# Test DNS resolution
 nslookup google.com 127.0.0.1
 nslookup google.com 192.168.0.48
-
-# Check listening ports
 sudo ss -tuln | grep :80
 sudo netstat -tulnp | grep :53
 ```
 
 ---
 
-## ✅ Final Result
+## 📉 Common Errors & Fix Summary
 
-After following this guide:
-
-* ✅ Pi-hole is running as a **primary DNS resolver** on `192.168.0.48`.
-* ✅ The web interface is accessible via `http://192.168.0.48/admin`.
-* ✅ All DNS traffic is filtered, ads blocked, and analytics viewable in real time.
-* ✅ The system is fully stable and persistent across reboots.
+| Error / Issue                                      | Cause                            | Fix                                                                                     |                      |                       |                                                        |
+| -------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------- | -------------------- | --------------------- | ------------------------------------------------------ |
+| `curl: command not found`                          | curl not installed               | `sudo apt install curl -y`                                                              |                      |                       |                                                        |
+| `lighttpd: command not found`                      | web server missing               | `sudo apt install lighttpd -y`                                                          |                      |                       |                                                        |
+| Dashboard not opening (`http://<IP>/admin`)        | lighttpd not running             | `sudo systemctl start lighttpd`                                                         |                      |                       |                                                        |
+| `pihole-FTL` failed to start                       | FTL crashed or missing config    | `sudo systemctl restart pihole-FTL`                                                     |                      |                       |                                                        |
+| `nslookup google.com 192.168.0.48 → Query refused` | Pi-hole listening only locally   | `sudo sed -i 's                                                                         | DNSMASQ_LISTENING=.* | DNSMASQ_LISTENING=all | ' /etc/pihole/setupVars.conf && sudo pihole reloaddns` |
+| `Timeout` during DNS queries                       | wrong IP or service down         | Restart Pi-hole and check `sudo netstat -tulnp                                          | grep :53`            |                       |                                                        |
+| `/etc/pihole/setupVars.conf` missing               | config deleted or corrupted      | recreate manually (see above section)                                                   |                      |                       |                                                        |
+| `lighttpd: failed to start`                        | bad configuration                | `sudo lighttpd -t -f /etc/lighttpd/lighttpd.conf` to test syntax, then restart          |                      |                       |                                                        |
+| `curl http://localhost/admin` returns nothing      | web server down                  | `sudo systemctl restart lighttpd`                                                       |                      |                       |                                                        |
+| `DNS not resolving`                                | Pi-hole service stopped          | `sudo systemctl status pihole-FTL` then `sudo systemctl restart pihole-FTL`             |                      |                       |                                                        |
+| Can't reach Pi-hole from another device            | Firewall / interface restriction | `DNSMASQ_LISTENING=all` and check router DNS set to Pi IP                               |                      |                       |                                                        |
+| `403 Forbidden` on dashboard                       | Permission or FTL cache issue    | `sudo systemctl restart pihole-FTL && sudo systemctl restart lighttpd`                  |                      |                       |                                                        |
+| IP changed after reboot                            | DHCP conflict                    | Reserve Pi IP in router or make static in `/etc/dhcpcd.conf`                            |                      |                       |                                                        |
+| `sudo: pihole: command not found`                  | PATH or install issue            | Re-run installer: `curl -sSL [https://install.pi-hole.net](https://install.pi-hole.net) | bash`                |                       |                                                        |
 
 ---
 
-## 🧠 Author Notes
+### 🧠 Maintainer
 
-This guide documents a **real debugging session** with a Raspberry Pi 1.
-Every issue, command, and resolution here was tested and verified in a live environment.
-
-If this helped you — ⭐ star the repo, and feel free to contribute improvements or automation scripts for Pi-hole deployment.
-
----
-
-### 💬 Contact
-
-For questions or contributions:
+**GitHub:** [thorerstic](https://github.com/thorerstic)
 
 ```
-github.com/thorestic
 ```
