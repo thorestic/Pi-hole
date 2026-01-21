@@ -264,7 +264,7 @@ sudo netstat -tulnp | grep :53
 | Can't reach Pi-hole from another device            | Firewall / interface restriction | `DNSMASQ_LISTENING=all` and check router DNS set to Pi IP                               |                      |                       |                                                        |
 | `403 Forbidden` on dashboard                       | Permission or FTL cache issue    | `sudo systemctl restart pihole-FTL && sudo systemctl restart lighttpd`                  |                      |                       |                                                        |
 | IP changed after reboot                            | DHCP conflict                    | Reserve Pi IP in router or make static in `/etc/dhcpcd.conf`                            |                      |                       |                                                        |
-| `sudo: pihole: command not found`                  | PATH or install issue            | Re-run installer: `curl -sSL [https://install.pi-hole.net](https://install.pi-hole.net) | bash`                |                       |                                                        |
+| `sudo: pihole: command not found`                  | PATH or install issue            | Re-run installer: `curl -sSL [https://install.pi-hole.net](https://install.pi-hole.net) |                      |                       |                                                        
 
 ---
 
