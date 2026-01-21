@@ -270,7 +270,4 @@ sudo netstat -tulnp | grep :53
 
 ### 🧠 Maintainer
 
-**GitHub:** [thorerstic](https://github.com/thorerstic)
-
-```
-```
+**GitHub:** [thorestic](https://github.com/thorestic)
